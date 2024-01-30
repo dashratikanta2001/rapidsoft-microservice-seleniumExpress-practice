@@ -19,6 +19,8 @@ public class AddressService {
 
 	public AddressResponse getAddressByEmployeeId(int id) {
 		// TODO Auto-generated method stub
+		System.out.println("Finding address for employee "+ id);
+
 		Address address = addressDao.findAddressByEmployeeId(id);
 		AddressResponse addressResponse = modelMapper.map(address, AddressResponse.class);
 		

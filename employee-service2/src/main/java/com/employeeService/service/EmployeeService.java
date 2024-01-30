@@ -28,7 +28,6 @@ public class EmployeeService {
 	{
 		//AddressResponse -> set data by making a rest api call
 		
-		
 		Employee employee = employeeDao.findById(id).get();
 		
 		EmployeeResponse employeeResponse = modelMapper.map(employee, EmployeeResponse.class);
