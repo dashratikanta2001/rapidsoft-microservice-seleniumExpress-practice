@@ -1,4 +1,4 @@
-package com.addressService.response;
+package com.employeeService.response;
 
 public class AddressResponse {
 
