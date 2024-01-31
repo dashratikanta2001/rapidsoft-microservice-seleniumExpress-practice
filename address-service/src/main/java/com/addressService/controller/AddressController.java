@@ -23,4 +23,10 @@ public class AddressController {
 		
 		return ResponseEntity.status(HttpStatus.OK).body(addressResponse);
 	}
+	
+	@GetMapping("/address")
+	public ResponseEntity<?> getAllAddress() {
+		return ResponseEntity.status(HttpStatus.OK).body("Ok");
+	}
+	
 }

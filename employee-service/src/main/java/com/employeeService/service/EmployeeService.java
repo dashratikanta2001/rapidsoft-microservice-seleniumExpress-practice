@@ -1,5 +1,8 @@
 package com.employeeService.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
@@ -52,6 +55,19 @@ public class EmployeeService {
 		
 		return employeeResponse;
 	}
+	
+public List<EmployeeResponse> getAllEmployees() {
+		List<Employee> employees = employeeDao.findAll();
+		
+		List<EmployeeResponse> employeeResponseList = employees.stream().map(emp -> modelMapper.map(emp, EmployeeResponse.class)).collect(Collectors.toList());
+		
+		//This is one approach.
+//		employeeResponseList.forEach(emp ->{
+//			emp.setAddressResponse(addressClient.getAddressByEmployeeId(emp.getId()).getBody());
+//		});
+		
+		return employeeResponseList;
+	}
 
 //
 //private AddressResponse callToAddressServiceUsingWebClient(int id) {
@@ -69,4 +85,6 @@ public class EmployeeService {
 
 		return 	restTemplate.getForObject("http://ADDRESS-SERVICE/address-app/api/address/{id}", AddressResponse.class, id);
 	}
+
+	
 }
