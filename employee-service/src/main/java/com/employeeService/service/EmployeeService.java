@@ -1,8 +1,5 @@
 package com.employeeService.service;
 
-import java.util.List;
-import java.util.Map;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
@@ -27,16 +24,7 @@ public class EmployeeService {
 	
 	@Autowired
 	private ModelMapper modelMapper;
-	
-	@Autowired
-	private WebClient webClient;
-	
-//	@Autowired
-//	private DiscoveryClient discoveryClient;
-	
-	@Autowired
-	private LoadBalancerClient loadBalancerClient;
-	
+		
 	
 	public EmployeeResponse getEmployeeById(int id)
 	{
@@ -56,34 +44,20 @@ public class EmployeeService {
 		return employeeResponse;
 	}
 
-
-private AddressResponse callToAddressServiceUsingWebClient(int id) {
-	// TODO Auto-generated method stub
-	return webClient
-			.get()
-			.uri("/address/"+id)
-			.retrieve()
-			.bodyToMono(AddressResponse.class)
-			.block();
-}
+//
+//private AddressResponse callToAddressServiceUsingWebClient(int id) {
+//	// TODO Auto-generated method stub
+//	return webClient
+//			.get()
+//			.uri("/address/"+id)
+//			.retrieve()
+//			.bodyToMono(AddressResponse.class)
+//			.block();
+//}
 
 	private AddressResponse callingAddressServiceUsingRESTTemplate(int id) {
 		// Get me the details for the ip and a port number for address service.
-//		List<ServiceInstance> instances = discoveryClient.getInstances("ADDRESS-SERVICE");
-//		
-//		ServiceInstance serviceInstance = instances.get(0);
-//		String uri = serviceInstance.getUri().toString();
-//		System.out.println("Uri = "+uri);
-		
-		ServiceInstance serviceInstance = loadBalancerClient.choose("ADDRESS-SERVICE");
-		String uri = serviceInstance.getUri().toString();
-		String contextPath = serviceInstance.getMetadata().get("configPath");
-		System.out.println(serviceInstance.getMetadata().get("user"));
-		System.out.println(serviceInstance.getMetadata().get("password"));
-		
-		
-		System.out.println("URI ---------->"+uri+contextPath);
-		
-		return 	restTemplate.getForObject(uri+contextPath+"/address/{id}", AddressResponse.class, id);
+
+		return 	restTemplate.getForObject("http://ADDRESS-SERVICE/address-app/api/address/{id}", AddressResponse.class, id);
 	}
 }
