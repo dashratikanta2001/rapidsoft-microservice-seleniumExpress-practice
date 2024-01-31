@@ -1,8 +1,14 @@
 package com.employeeService.service;
 
+import java.util.List;
+import java.util.Map;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.employeeService.dao.EmployeeDao;
@@ -16,7 +22,8 @@ public class EmployeeService {
 	@Autowired
 	private EmployeeDao employeeDao;
 	
-//	private RestTemplate restTemplate;
+	@Autowired
+	private RestTemplate restTemplate;
 	
 	@Autowired
 	private ModelMapper modelMapper;
@@ -24,13 +31,12 @@ public class EmployeeService {
 	@Autowired
 	private WebClient webClient;
 	
+//	@Autowired
+//	private DiscoveryClient discoveryClient;
 	
-//	public EmployeeService(@Value("${addressservice.base.url}") String addressBaseUrl,RestTemplateBuilder builder) {
-//
-//		this.restTemplate= builder
-//							.rootUri(addressBaseUrl)
-//							.build();
-//	}
+	@Autowired
+	private LoadBalancerClient loadBalancerClient;
+	
 	
 	public EmployeeResponse getEmployeeById(int id)
 	{
@@ -41,20 +47,43 @@ public class EmployeeService {
 		
 		EmployeeResponse employeeResponse = modelMapper.map(employee, EmployeeResponse.class);
 		
-		AddressResponse addressResponse = webClient
-												.get()
-												.uri("/address/"+id)
-												.retrieve()
-												.bodyToMono(AddressResponse.class)
-												.block();
+		AddressResponse addressResponse = callingAddressServiceUsingRESTTemplate(id);
+				
+				
 		
 		employeeResponse.setAddressResponse(addressResponse);
 		
 		return employeeResponse;
 	}
 
-//	private AddressResponse callingAddressServiceUsingRESTTemplate(int id) {
-//		// TODO Auto-generated method stub
-//		return 	restTemplate.getForObject("/address/{id}", AddressResponse.class, id);
-//	}
+
+private AddressResponse callToAddressServiceUsingWebClient(int id) {
+	// TODO Auto-generated method stub
+	return webClient
+			.get()
+			.uri("/address/"+id)
+			.retrieve()
+			.bodyToMono(AddressResponse.class)
+			.block();
+}
+
+	private AddressResponse callingAddressServiceUsingRESTTemplate(int id) {
+		// Get me the details for the ip and a port number for address service.
+//		List<ServiceInstance> instances = discoveryClient.getInstances("ADDRESS-SERVICE");
+//		
+//		ServiceInstance serviceInstance = instances.get(0);
+//		String uri = serviceInstance.getUri().toString();
+//		System.out.println("Uri = "+uri);
+		
+		ServiceInstance serviceInstance = loadBalancerClient.choose("ADDRESS-SERVICE");
+		String uri = serviceInstance.getUri().toString();
+		String contextPath = serviceInstance.getMetadata().get("configPath");
+		System.out.println(serviceInstance.getMetadata().get("user"));
+		System.out.println(serviceInstance.getMetadata().get("password"));
+		
+		
+		System.out.println("URI ---------->"+uri+contextPath);
+		
+		return 	restTemplate.getForObject(uri+contextPath+"/address/{id}", AddressResponse.class, id);
+	}
 }
