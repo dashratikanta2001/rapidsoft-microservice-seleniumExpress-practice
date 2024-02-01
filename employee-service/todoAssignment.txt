@@ -1,4 +1,5 @@
 1. /employees -> fetch all the employees will addressResponse
+(completed)
 
 2. /employee -> (JSON) delevelop an POST endpoint to create an employee with all the employee details with addresdetails.
-
+(completed)

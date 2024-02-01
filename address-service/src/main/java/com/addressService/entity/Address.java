@@ -27,6 +27,9 @@ public class Address {
 
 	@Column(name = "state")
 	private String state;
+	
+	@Column(name = "employee_id")
+	private int employeeId;
 
 	public int getId() {
 		return id;
@@ -68,13 +71,22 @@ public class Address {
 		this.state = state;
 	}
 
-	public Address(int id, String lane1, String lane2, String zip, String state) {
+	public int getEmployeeId() {
+		return employeeId;
+	}
+
+	public void setEmployeeId(int employeeId) {
+		this.employeeId = employeeId;
+	}
+
+	public Address(int id, String lane1, String lane2, String zip, String state, int employeeId) {
 		super();
 		this.id = id;
 		this.lane1 = lane1;
 		this.lane2 = lane2;
 		this.zip = zip;
 		this.state = state;
+		this.employeeId = employeeId;
 	}
 
 	public Address() {

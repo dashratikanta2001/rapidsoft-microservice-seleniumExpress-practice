@@ -3,6 +3,8 @@ package com.employeeService.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
@@ -19,6 +21,7 @@ import com.employeeService.response.AddressResponse;
 import com.employeeService.response.EmployeeResponse;
 
 @Service
+@Transactional
 public class EmployeeService {
 
 	@Autowired
@@ -58,13 +61,22 @@ public class EmployeeService {
 	
 public List<EmployeeResponse> getAllEmployees() {
 		List<Employee> employees = employeeDao.findAll();
-		
 		List<EmployeeResponse> employeeResponseList = employees.stream().map(emp -> modelMapper.map(emp, EmployeeResponse.class)).collect(Collectors.toList());
 		
 		//This is one approach.
 //		employeeResponseList.forEach(emp ->{
 //			emp.setAddressResponse(addressClient.getAddressByEmployeeId(emp.getId()).getBody());
 //		});
+		List<AddressResponse> addressResponse = addressClient.getAllAddress().getBody();
+		
+		employeeResponseList.forEach(employee->{
+			for (AddressResponse addrResp : addressResponse) {
+				if(addrResp.getId() == employee.getId())
+				{
+					employee.setAddressResponse(addrResp);
+				}
+			}
+		});
 		
 		return employeeResponseList;
 	}
@@ -84,6 +96,25 @@ public List<EmployeeResponse> getAllEmployees() {
 		// Get me the details for the ip and a port number for address service.
 
 		return 	restTemplate.getForObject("http://ADDRESS-SERVICE/address-app/api/address/{id}", AddressResponse.class, id);
+	}
+
+	public EmployeeResponse saveEmployee(EmployeeResponse employeeResponse) {
+		// TODO Auto-generated method stub
+		Employee employeeMap = modelMapper.map(employeeResponse, Employee.class);
+		
+		Employee employee = employeeDao.save(employeeMap);
+		
+		employeeResponse.getAddressResponse().setEmployeeId(employee.getId());
+		
+		System.out.println("Address's Emp  id = "+employeeResponse.getAddressResponse().getEmployeeId());
+//		employeeResponse.setAddressResponse(employeeResponse.getAddressResponse());
+		
+		AddressResponse addressResponse = addressClient.addAddress(employeeResponse.getAddressResponse()).getBody();
+		
+		EmployeeResponse response = modelMapper.map(employee, EmployeeResponse.class);
+		response.setAddressResponse(addressResponse);
+		
+		return response;
 	}
 
 	
